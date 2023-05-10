@@ -11,8 +11,10 @@ export default function PaymentTicketContainer() {
     <>
       {/* Catei da página de inscrição */}
       <StyledTypography variant="h4"> Ingresso e pagamento</StyledTypography>
+    
+      {/* 
+      Parte de visualização do pagamento 
 
-      {/*Parte de visualização do pagamento */}
       <StyledTypography variant="h5" color="#8E8E8E">
         {' '}
         Ingresso escolhido
@@ -33,7 +35,10 @@ export default function PaymentTicketContainer() {
       <CreditCardPlaceholder/>
       <SubmitContainer>
         <Button type="submit">Finalizar Pagamento</Button>
-      </SubmitContainer>
+      </SubmitContainer> 
+    
+      */}
+
     </>
   );
 }
