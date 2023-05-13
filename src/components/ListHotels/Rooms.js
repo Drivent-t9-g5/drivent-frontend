@@ -1,5 +1,5 @@
 import React from 'react';
-import { BsPerson } from 'react-icons/bs';
+import { BsPerson, BsFillPersonFill } from 'react-icons/bs';
 import styled from 'styled-components';
 
 export default function RoomDiv(props) {
@@ -14,8 +14,15 @@ export default function RoomDiv(props) {
     <Container selected={selected} onClick={handleClick}>
       <h1>{room.name}</h1>
       <div>
-        {Array.from({ length: room.capacity }, (_, index) => (
-          <BsPerson key={index} size={22} background-color='black'/>
+        {Array.from({ length: room.available }, (_, index) => (
+          <StyledBsPerson
+            key={index}
+            size={22}
+            selected={selected && index === 0}
+          />
+        ))}
+        {Array.from({ length: room.reserved }, (_, index) => (
+          <BsFillPersonFill key={index} size={22} />
         ))}
       </div>
     </Container>
@@ -29,7 +36,8 @@ const Container = styled.div`
   margin: 14px 18px 14px 0;
   border: 1px solid #cecece;
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  padding: 0 4px 0 10px;
   align-items: center;
   background-color: ${(props) => (props.selected ? '#ffeed2' : 'transparent')};
   cursor: pointer;
@@ -49,4 +57,8 @@ const Container = styled.div`
   div {
     display: flex;
   }
+`;
+
+const StyledBsPerson = styled(BsPerson)`
+  color: ${(props) => (props.selected ? '#FF4791' : 'black')};
 `;

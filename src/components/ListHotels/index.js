@@ -26,7 +26,7 @@ export default function ListHotels() {
         if (hotelId !== 0) {
           const roomsData = await getRooms(token, hotelId);
           console.log(roomsData);
-          const resolvedRooms = await roomsData.Rooms;
+          const resolvedRooms = await roomsData;
           setRooms(resolvedRooms);
         }
         console.log(hotelsData);
