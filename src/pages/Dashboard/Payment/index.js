@@ -1,3 +1,5 @@
+import PaymentTicketContainer from '../../../components/Payment';
+
 export default function Payment() {
-  return 'Pagamento: Em breve!';
+  return <PaymentTicketContainer />;
 }
