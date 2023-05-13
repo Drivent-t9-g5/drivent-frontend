@@ -5,13 +5,15 @@ import { getHotels, getRooms } from '../../services/hotelsApi';
 import useToken from '../../hooks/useToken';
 import { Typography } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import { BsPerson } from 'react-icons/bs';
+import RoomDiv from './Rooms';
+import HotelDiv from './Hotel';
 
 export default function ListHotels() {
   const token = useToken();
   const [hotels, setHotels] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [hotelId, setHotelId] = useState(0);
+  const [roomId, setRoomId] = useState(0);
   const [notPossible, setNotPossible] = useState(true);
 
   useEffect(() => {
@@ -24,7 +26,8 @@ export default function ListHotels() {
         if (hotelId !== 0) {
           const roomsData = await getRooms(token, hotelId);
           console.log(roomsData);
-          setRooms(roomsData.Rooms || []);
+          const resolvedRooms = await roomsData.Rooms;
+          setRooms(resolvedRooms);
         }
         console.log(hotelsData);
       } catch (err) {
@@ -42,7 +45,7 @@ export default function ListHotels() {
   console.log('hotels', hotels);
   console.log('rooms', rooms);
 
-  if (!hotels) return 'carregando';
+  if (!hotels) return null;
 
   if (hotelId === 0)
     return (
@@ -54,22 +57,7 @@ export default function ListHotels() {
             {notPossible ? (
               <h1>Faça o pagamento de um ticket que inclui uma reserva de Hotel para desbloquear essa página!</h1>
             ) : (
-              hotels.map((hotel) => (
-                <HotelDiv key={hotel.id} onClick={() => setHotelId(hotel.id)}>
-                  <img src={hotel.image} alt={hotel.name} />
-                  <div>
-                    <h1>{hotel.name}</h1>
-                    <div>
-                      <h2>Tipos de acomodação:</h2>
-                      <h3>Single, Double e Triple</h3>
-                    </div>
-                    <div>
-                      <h2>Vagas disponíveis:</h2>
-                      <h3>119</h3>
-                    </div>
-                  </div>
-                </HotelDiv>
-              ))
+              hotels?.map((hotel) => <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId}  />)
             )}
           </Hotels>
         </Ctnr>
@@ -81,34 +69,14 @@ export default function ListHotels() {
         <Ctnr>
           <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
           <Hotels>
-            {hotels.map((hotel) => (
-              <HotelDiv key={hotel.id} onClick={() => setHotelId(hotel.id)}>
-                <img src={hotel.image} alt={hotel.name} />
-                <div>
-                  <h1>{hotel.name}</h1>
-                  <div>
-                    <h2>Tipos de acomodação:</h2>
-                    <h3>Single, Double e Triple</h3>
-                  </div>
-                  <div>
-                    <h2>Vagas disponíveis:</h2>
-                    <h3>119</h3>
-                  </div>
-                </div>
-              </HotelDiv>
+            {hotels?.map((hotel) => (
+              <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId}  />
             ))}
           </Hotels>
           <h1>Ótima pedida! Agora escolha seu quarto:</h1>
           <RoomsDiv>
             {rooms?.map((room) => (
-              <RoomDiv key={room.id}>
-                <h1>{room.name}</h1>
-                <div>
-                  {Array.from({ length: room.capacity }, (_, index) => (
-                    <BsPerson key={index} size={22}  />
-                  ))}
-                </div>
-              </RoomDiv>
+              <RoomDiv key={room.id} room={room} roomId={roomId} setRoomId={setRoomId}/>
             ))}
           </RoomsDiv>
         </Ctnr>
@@ -134,66 +102,6 @@ const Hotels = styled.div`
   display: flex;
 `;
 
-const HotelDiv = styled.div`
-  height: 264px;
-  width: 196px;
-  border-radius: 10px;
-  background-color: #ebebeb;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-right: 22px;
-  margin-bottom: 22px;
-  &:hover {
-    background-color: #ffeed2;
-    cursor: pointer;
-  }
-
-  img {
-    margin-top: 12px;
-    height: 109px;
-    width: 168px;
-    border-radius: 5px;
-  }
-
-  div {
-    width: 100%;
-    height: 62%;
-    margin-top: 3px;
-
-    h1 {
-      font-family: Roboto;
-      font-size: 20px;
-      font-weight: 400;
-      line-height: 23px;
-      text-align: left;
-      padding-left: 14px;
-    }
-
-    div {
-      display: flex;
-      flex-direction: column;
-      padding-left: 14px;
-      height: 40px;
-
-      h2 {
-        font-family: Roboto;
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 14px;
-      }
-
-      h3 {
-        font-family: Roboto;
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 14px;
-        text-align: left;
-      }
-    }
-  }
-`;
-
 const StyledTypography = styled(Typography)`
   margin-bottom: 20px !important;
 `;
@@ -203,29 +111,4 @@ const RoomsDiv = styled.div`
   flex-wrap: wrap;
   width: 88%;
   align-items: start;
-`;
-
-const RoomDiv = styled.div`
-  height: 45px;
-  width: 190px;
-  border-radius: 10px;
-  margin: 14px;
-  border: 1px solid #cecece;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  &:hover{
-    cursor: pointer;
-    background-color: #FFEED2;
-  }
-  h1 {
-    font-family: Roboto;
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 23px;
-    color: #454545;
-  }
-  div {
-    display: flex;
-  }
 `;
