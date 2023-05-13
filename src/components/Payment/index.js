@@ -1,14 +1,10 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
-
-import { TycketPaymentInfo } from './TycketPaymentInfo';
-
-import Button from '../Form/Button';
-import CreditCardPlaceholder from './CreditCardPlaceholder';
 import { useEffect, useState } from 'react';
 import { getPersonalInformations } from '../../services/enrollmentApi';
 import useToken from '../../hooks/useToken';
 import PaymentComponent from './PaymentComponent';
+import IncompleteEnrollment from './IncompleteEnrollment';
 
 export default function PaymentTicketContainer() {
   const [enrollment, setEnrollment] = useState(false);
@@ -23,7 +19,7 @@ export default function PaymentTicketContainer() {
       <StyledTypography variant="h4"> Ingresso e pagamento</StyledTypography>
 
       {enrollment ?
-        <>PaymentComponentHERE</> :
+        <><PaymentComponent /></> :
         <IncompleteEnrollment />
       }
       {/* 

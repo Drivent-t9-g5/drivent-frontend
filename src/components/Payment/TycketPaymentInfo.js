@@ -1,7 +1,25 @@
 import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import axios from 'axios';
 
 export default function TycketPaymentInfoComponent() {
+  const [ticketType, setTicketType] = useState({});
+
+  useEffect(async() => {
+    await axios
+      .get('http://localhost:4000/tickets')
+      .then((ans) => {
+        const ticketInfo = ans.data;
+        setTicketType(...ticketInfo);
+      })
+      .catch((err) => {
+        console.log(err.data);
+      });
+    console.log(ticketType);
+  }, [ticketType]);
+
   return (
     <>
       <TycketPaymentInfo>
