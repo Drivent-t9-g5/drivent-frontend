@@ -12,11 +12,11 @@ export default function HotelDiv(props) {
         <h1>{hotel.name}</h1>
         <div>
           <h2>Tipos de acomodação:</h2>
-          <h3>Single, Double e Triple</h3>
+          <h3>{hotel.types}</h3>
         </div>
         <div>
           <h2>Vagas disponíveis:</h2>
-          <h3>119</h3>
+          <h3>{hotel.disponible}</h3>
         </div>
       </div>
     </ContainerHotel>
