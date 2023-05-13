@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import useTicketType from '../../hooks/api/useTicketType';
 import usePostTicket from '../../hooks/api/usePostTicket';
 import { toast } from 'react-toastify';
+import { useContext } from 'react';
+import TicketContext from '../../contexts/TicketContext';
 
 export default function Ticket() {
   const [selectedTicket, setSelectedTicket] = useState('');
@@ -16,6 +18,7 @@ export default function Ticket() {
   const [amount, setAmount] = useState(0);
   const { ticketTypes } = useTicketType();
   const { postTicketLoading, postTicketAct } = usePostTicket();
+  const { ticket, setTicket } = useContext(TicketContext);
 
   useEffect(() => {
     if (ticketTypes) {
@@ -64,6 +67,7 @@ export default function Ticket() {
     try {
       await postTicketAct({ ticketTypeId });
       toast('Ingresso reservado com sucesso!');
+      setTicket(ticketTypeId);
     } catch (error) {
       toast('Não foi possível reservar o ingresso!');
     }

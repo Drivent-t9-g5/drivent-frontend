@@ -1,72 +1,97 @@
 import styled from 'styled-components';
-import Cards from 'react-credit-cards';
-import 'react-credit-cards/es/styles-compiled.css';
+import Cards from 'react-credit-cards-2';
+import 'react-credit-cards-2/dist/es/styles-compiled.css';
 import { useState } from 'react';
-import { useEffect } from 'react';
 import Input from '../Form/Input';
 import Button from '../Form/Button';
 
-export default function CreditCardPlaceholder() {
-  const [creditCardInfo, setCreditCardInfo] = useState({
-    cvc: '',
-    expiry: '',
-    focus: '',
-    name: '',
+const CreditCardPlaceholder = () => {
+  const [state, setState] = useState({
     number: '',
+    expiry: '',
+    cvc: '',
+    name: '',
+    focus: '',
   });
 
-  useEffect(() => {}, [creditCardInfo]);
+  const handleInputChange = (evt) => {
+    const { name, value } = evt.target;
 
-  /* function handleInputFocus(e) {
-    setCreditCardInfo({ focus: e.target.name });
-  } */
+    setState((prev) => ({ ...prev, [name]: value }));
+  };
 
-  function handleInputChange(e) {
-    const { name, value } = e.target;
+  const handleInputFocus = (evt) => {
+    setState((prev) => ({ ...prev, focus: evt.target.name }));
+  };
 
-    setCreditCardInfo({ [name]: value });
-  }
-
-  function teste(e) {
-    e.preventDefault();
-    console.log('OI');
+  function test() {
+    console.log(state);
   }
 
   return (
-    <CreditCardContainer>
-      <Cards
-        cvc={creditCardInfo.cvc}
-        expiry={creditCardInfo.expiry}
-        focused={creditCardInfo.focus}
-        name={creditCardInfo.name}
-        number={creditCardInfo.number}
-      />
-
-      <form onSubmit={teste}>
-        <Input
-          type="tel"
-          name="number"
-          placeholder="Card Number"
-          onChange={handleInputChange}
-          //onFocus={handleInputFocus}
-        />
-        <Input type="tel" name="name" placeholder="Name" onChange={handleInputChange} //onFocus={handleInputFocus} 
-        />
-        <Input
-          type="tel"
-          name="expiry"
-          placeholder="Valid Thru"
-          onChange={handleInputChange}
-          //onFocus={handleInputFocus}
-        />
-        <Input type="tel" name="cvv" placeholder="CVV" onChange={handleInputChange} //onFocus={handleInputFocus} 
-        />
-
-        <Button type="submit">Oi</Button>
-      </form>
-    </CreditCardContainer>
+    <>
+      <CreditCardContainer>
+        <Cards number={state.number} expiry={state.expiry} cvc={state.cvc} name={state.name} focused={state.focus} />
+        <StyledPaymentForm onSubmit={test}>
+          <Input
+            type="text"
+            name="number"
+            placeholder="Card Number"
+            value={state.number}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+          />
+          <Input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={state.name}
+            onChange={handleInputChange}
+            onFocus={handleInputFocus}
+          />
+          <div>
+            <Input
+              type="text"
+              name="expiry"
+              placeholder="Valid Thru"
+              value={state.expiry}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+            />
+            <Input
+              type="text"
+              name="cvc"
+              placeholder="CVC"
+              value={state.cvc}
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+            />
+          </div>
+          {/* <Button type="submit"> Oi </Button> */}
+        </StyledPaymentForm>
+      </CreditCardContainer>
+      <SubmitContainer>
+        <Button onClick= {test}>Finalizar Pagamento</Button>
+      </SubmitContainer>
+    </>
   );
-}
+};
+
+const StyledPaymentForm = styled.form`
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  div {
+    width: 90%;
+    display: flex;
+    align-items: flex-start;
+    input{
+      width: 45%;
+    }
+  }
+`;
 
 const CreditCardContainer = styled.div`
   width: 706px;
@@ -74,4 +99,18 @@ const CreditCardContainer = styled.div`
 
   display: flex;
   flex-direction: row;
+
+  align-items: center;
+  justify-content: flex-start;
 `;
+
+const SubmitContainer = styled.div`
+  margin-top: 40px !important;
+  width: 100% !important;
+
+  > button {
+    margin-top: 0 !important;
+  }
+`;
+
+export default CreditCardPlaceholder;
