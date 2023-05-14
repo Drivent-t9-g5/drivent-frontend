@@ -68,6 +68,7 @@ export default function Ticket() {
       await postTicketAct({ ticketTypeId });
       toast('Ingresso reservado com sucesso!');
       setTicket(ticketTypeId);
+      console.log(ticketTypeId);
     } catch (error) {
       toast('Não foi possível reservar o ingresso!');
     }

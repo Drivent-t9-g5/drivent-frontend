@@ -10,22 +10,23 @@ import axios from 'axios';
 import useToken from '../../hooks/useToken';
 import { useContext } from 'react';
 import TicketContext from '../../contexts/TicketContext';
+import { getTicketInformation } from '../../services/ticketApi';
 
 export default function PaymentComponent() {
   const [hasTicket, setHasTicket] = useState(false);
-  const { ticket, setTicket } = useContext(TicketContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const { ticket } = useContext(TicketContext);
+  const [ticketId, setTicketId] = useState();
   const token = useToken();
 
-  useEffect(() => {
-    axios
-      .get('http://localhost:4000/tickets', { headers: { Authorization: `Bearer ${token}` } })
-      .then((ans) => {
-        const ticket = ans.data;
-        setHasTicket(ticket);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
+  useEffect(async() => {
+    console.log('Ticket: ', ticket);
+    setIsLoading(true);
+    try {
+      setHasTicket(await getTicketInformation(token));
+    } catch (error) {
+      console.log(error.message);
+    }
   }, [ticket]);
 
   return (
@@ -38,7 +39,7 @@ export default function PaymentComponent() {
             Ingresso escolhido
           </StyledTypography>
 
-          <TycketPaymentInfoComponent />
+          <TycketPaymentInfoComponent setTicketId = {setTicketId}/>
 
           {/* Formulário do cartão */}
           <StyledTypography variant="h5" color={'#8E8E8E'}>
@@ -46,7 +47,7 @@ export default function PaymentComponent() {
             Pagamento
           </StyledTypography>
 
-          <CreditCardPlaceholder />
+          <CreditCardPlaceholder ticketId = {ticketId} />
         </>
       ) : (
         <Ticket />
