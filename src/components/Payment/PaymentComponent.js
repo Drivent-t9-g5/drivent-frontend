@@ -11,6 +11,8 @@ import useToken from '../../hooks/useToken';
 import { useContext } from 'react';
 import TicketContext from '../../contexts/TicketContext';
 import { getTicketInformation } from '../../services/ticketApi';
+import PaidOut from './PaidOut';
+import { getPayment } from '../../services/paymentApi';
 
 export default function PaymentComponent() {
   const [hasTicket, setHasTicket] = useState(false);
@@ -18,6 +20,8 @@ export default function PaymentComponent() {
   const { ticket } = useContext(TicketContext);
   const [ticketId, setTicketId] = useState();
   const token = useToken();
+  const [paymentConfirmation, setPaymentConfirmation] = useState(false);
+  const [finalizePayment, setFinalizePayment] = useState(false);
 
   useEffect(async() => {
     console.log('Ticket: ', ticket);
@@ -28,6 +32,9 @@ export default function PaymentComponent() {
       console.log(error.message);
     }
   }, [ticket]);
+  useEffect(async() => {
+    if(hasTicket.id)setPaymentConfirmation(await getPayment(hasTicket.id, token));
+  }, [hasTicket, finalizePayment]);
 
   return (
     <>
@@ -39,15 +46,17 @@ export default function PaymentComponent() {
             Ingresso escolhido
           </StyledTypography>
 
-          <TycketPaymentInfoComponent setTicketId = {setTicketId}/>
+          <TycketPaymentInfoComponent setTicketId={setTicketId} />
 
           {/* Formulário do cartão */}
           <StyledTypography variant="h5" color={'#8E8E8E'}>
             {' '}
             Pagamento
           </StyledTypography>
-
-          <CreditCardPlaceholder ticketId = {ticketId} />
+          {paymentConfirmation ?
+            <PaidOut /> :
+            <CreditCardPlaceholder ticketId={ticketId} setFinalizePayment={setFinalizePayment}/>
+          }
         </>
       ) : (
         <Ticket />
