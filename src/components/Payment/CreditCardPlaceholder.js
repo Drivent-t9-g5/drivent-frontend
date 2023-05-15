@@ -4,40 +4,83 @@ import 'react-credit-cards-2/dist/es/styles-compiled.css';
 import { useState } from 'react';
 import Input from '../Form/Input';
 import Button from '../Form/Button';
+import creditCardType from 'credit-card-type';
+import { postPayment } from '../../services/paymentApi';
+import { toast } from 'react-toastify';
+import useToken from '../../hooks/useToken';
+import { useContext } from 'react';
+import TicketContext from '../../contexts/TicketContext';
 
-const CreditCardPlaceholder = () => {
-  const [state, setState] = useState({
+const CreditCardPlaceholder = ({ ticketId }) => {
+  const token = useToken();
+  const { ticket } = useContext(TicketContext);
+  const [cardInfo, setCardInfo] = useState({
     number: '',
     expiry: '',
     cvc: '',
     name: '',
     focus: '',
+    issuer: '',
   });
 
   const handleInputChange = (evt) => {
     const { name, value } = evt.target;
 
-    setState((prev) => ({ ...prev, [name]: value }));
+    if (name === 'number') {
+      const cardType = creditCardType(value)[0];
+      const issuer = cardType ? cardType.niceType : '';
+      setCardInfo((prev) => ({ ...prev, [name]: value, issuer }));
+    } else {
+      setCardInfo((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleInputFocus = (evt) => {
-    setState((prev) => ({ ...prev, focus: evt.target.name }));
+    setCardInfo((prev) => ({ ...prev, focus: evt.target.name }));
   };
 
-  function test() {
-    console.log(state);
+  async function paymentProcess() {
+    const date = [cardInfo.expiry.slice(0, 2), cardInfo.expiry.slice(2)];
+    const expirationDate = new Date(`20${date[1]}`, date[0] - 1);
+
+    const cardData = {
+      ...cardInfo,
+      number: parseInt(cardInfo.number),
+      expirationDate,
+      cvv: parseInt(cardInfo.cvc),
+    };
+    delete cardData.cvc;
+    delete cardData.focus;
+    delete cardData.expiry;
+
+    const body = { ticketId, cardData };
+    try {
+      await postPayment(body, token);
+
+      toast('Pagamento realizado com sucesso!');
+    } catch (error) {
+      toast('Não foi possível realizar o pagamento!');
+    }
+
+    console.log(body);
   }
 
   return (
     <>
       <CreditCardContainer>
-        <Cards number={state.number} expiry={state.expiry} cvc={state.cvc} name={state.name} focused={state.focus} />
-        <StyledPaymentForm onSubmit={test}>
+        <Cards
+          number={cardInfo.number}
+          expiry={cardInfo.expiry}
+          cvc={cardInfo.cvc}
+          name={cardInfo.name}
+          focused={cardInfo.focus}
+        />
+        <StyledPaymentForm onSubmit={paymentProcess}>
           <Input
             type="text"
             name="number"
             placeholder="Card Number"
-            value={state.number}
+            value={cardInfo.number}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
           />
@@ -45,24 +88,25 @@ const CreditCardPlaceholder = () => {
             type="text"
             name="name"
             placeholder="Name"
-            value={state.name}
+            value={cardInfo.name}
             onChange={handleInputChange}
             onFocus={handleInputFocus}
           />
+
           <div>
             <Input
               type="text"
               name="expiry"
               placeholder="Valid Thru"
-              value={state.expiry}
+              value={cardInfo.expiry}
               onChange={handleInputChange}
               onFocus={handleInputFocus}
             />
             <Input
               type="text"
               name="cvc"
-              placeholder="CVC"
-              value={state.cvc}
+              placeholder="CVV"
+              value={cardInfo.cvc}
               onChange={handleInputChange}
               onFocus={handleInputFocus}
             />
@@ -71,7 +115,7 @@ const CreditCardPlaceholder = () => {
         </StyledPaymentForm>
       </CreditCardContainer>
       <SubmitContainer>
-        <Button onClick= {test}>Finalizar Pagamento</Button>
+        <Button onClick={paymentProcess}>Finalizar Pagamento</Button>
       </SubmitContainer>
     </>
   );
@@ -82,13 +126,12 @@ const StyledPaymentForm = styled.form`
   flex-direction: column;
 
   align-items: center;
-
   div {
     width: 90%;
     display: flex;
     align-items: flex-start;
-    input{
-      width: 45%;
+    input {
+      width: 100%;
     }
   }
 `;
