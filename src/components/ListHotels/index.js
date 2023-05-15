@@ -36,9 +36,12 @@ export default function ListHotels() {
         console.log(err);
         setNotPossible(true);
         setErrMessage(err.message);
-        err.message === 'CannotListHotelsError'
-          ? toast('Ainda é necessário fazer o pagamento de um ingresso para ter acesso a hospedagens')
-          : toast('Seu ingresso não inclui a reserva de um Hotel!');
+        console.log('error: ' + err);
+        err.message === 'Request failed with status code 400'
+          ? toast()
+          : err.message === 'Request failed with status code 401'
+            ? toast('Ainda é necessário fazer o pagamento de um ingresso para ter acesso a hospedagens')
+            : toast('Seu ingresso não inclui a reserva de um Hotel!');
       }
     };
 
@@ -59,9 +62,13 @@ export default function ListHotels() {
           <Hotels>
             {notPossible ? (
               <Warning>
-                {errMessage === 'CannotListHotelsError'
-                  ? 'Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem'
-                  : 'Sua modalidade de ingresso não inclui hospedagem Prossiga para a escolha de atividades'}
+                <p>
+                  {errMessage === 'Request failed with status code 400'
+                    ? 'Você precisa completar sua inscrição antes de prosseguir pra escolha de ingresso'
+                    : errMessage === 'Request failed with status code 401'
+                      ? 'Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem'
+                      : 'Sua modalidade de ingresso não inclui hospedagem. Prossiga para a escolha de atividades'}
+                </p>
               </Warning>
             ) : (
               <>
@@ -142,7 +149,7 @@ const RoomsDiv = styled.div`
 `;
 
 const Warning = styled.div`
-  color: #8e8e8e;
+  color: #8E8E8E;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 400;
@@ -154,10 +161,10 @@ const Warning = styled.div`
   display: flex;
   justify-content: center;
   text-align: center;
-  padding-top: 150px;
+  padding-top: 223px;
   padding-right: 5%;
 
-  p {
+  p{
     width: 388px;
   }
 `;
