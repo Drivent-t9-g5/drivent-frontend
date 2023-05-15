@@ -2,30 +2,37 @@ import styled from 'styled-components';
 import Typography from '@material-ui/core/Typography';
 import { useState } from 'react';
 import { useEffect } from 'react';
-import axios from 'axios';
+import { getTicketInformation } from '../../services/ticketApi';
+import useToken from '../../hooks/useToken';
 
-export default function TycketPaymentInfoComponent() {
+export default function TycketPaymentInfoComponent({ setTicketId }) {
   const [ticketType, setTicketType] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [info, setInfo] = useState('');
+  const token = useToken();
 
   useEffect(async() => {
-    await axios
-      .get('http://localhost:4000/tickets')
-      .then((ans) => {
-        const ticketInfo = ans.data;
-        setTicketType(...ticketInfo);
-      })
-      .catch((err) => {
-        console.log(err.data);
-      });
+    if (isLoading) {
+      try {
+        const ticketInfo = await getTicketInformation(token);
+        setTicketType(ticketInfo.TicketType);
+        setTicketId(ticketInfo.id);
+        setIsLoading(!isLoading);
+      } catch (err) {
+        console.log('Vazio: ', err.message);
+      }
+    }
+    setInfo(`${ticketType.name} ${ticketType.includesHotel ? '+ Hotel' : ''}`);
+
     console.log(ticketType);
-  }, [ticketType]);
+  }, [isLoading, info]);
 
   return (
     <>
       <TycketPaymentInfo>
-        <StyledTypography variant="subtitle1">Presencial + Com Hotel</StyledTypography>
+        <StyledTypography variant="subtitle1"> {info} </StyledTypography>
         <StyledTypography variant="subtitle1" color={'#8E8E8E'}>
-          R$ 600
+          R$ {ticketType.price}
         </StyledTypography>
       </TycketPaymentInfo>
     </>
