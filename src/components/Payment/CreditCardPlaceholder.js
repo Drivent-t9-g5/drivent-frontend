@@ -11,7 +11,7 @@ import useToken from '../../hooks/useToken';
 import { useContext } from 'react';
 import TicketContext from '../../contexts/TicketContext';
 
-const CreditCardPlaceholder = ({ ticketId }) => {
+const CreditCardPlaceholder = ({ ticketId, setFinalizePayment }) => {
   const token = useToken();
   const { ticket } = useContext(TicketContext);
   const [cardInfo, setCardInfo] = useState({
@@ -56,7 +56,7 @@ const CreditCardPlaceholder = ({ ticketId }) => {
     const body = { ticketId, cardData };
     try {
       await postPayment(body, token);
-
+      setFinalizePayment(true);
       toast('Pagamento realizado com sucesso!');
     } catch (error) {
       toast('Não foi possível realizar o pagamento!');

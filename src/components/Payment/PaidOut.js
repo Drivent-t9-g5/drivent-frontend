@@ -1,18 +1,19 @@
-import styled from 'styled-components'
-import checkVector from '../../assets/images/checkVector.png'
+
+import styled from 'styled-components';
+import checkVector from '../../assets/images/checkVector.png';
 export default function PaidOut() {
-    return (
-        <ConfirmationContainer>
-            <img src={checkVector} />
-            <ConfirmationMessage>
-                <h5>Pagamento confirmado!</h5>
-                <p>Prossiga para escolha de hospedagem e atividades</p>
-            </ConfirmationMessage>
-        </ConfirmationContainer>
-    )
+  return (
+    <ConfirmationContainer>
+      <img src={checkVector} />
+      <ConfirmationMessage>
+        <h5>Pagamento confirmado!</h5>
+        <p>Prossiga para escolha de hospedagem e atividades</p>
+      </ConfirmationMessage>
+    </ConfirmationContainer>
+  );
 }
 const ConfirmationContainer = styled.div`
-    display: flex;
+  display: flex;
 `;
 const ConfirmationMessage = styled.div`
     padding-left: 14px;
