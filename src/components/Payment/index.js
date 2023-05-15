@@ -13,7 +13,7 @@ export default function PaymentTicketContainer() {
 
   useEffect(async() => {
     setEnrollment(await getPersonalInformations(token));
-  });
+  }, [token]);
 
   return (
     <>
