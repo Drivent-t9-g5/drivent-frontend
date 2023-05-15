@@ -15,6 +15,7 @@ export default function ListHotels() {
   const [hotelId, setHotelId] = useState(0);
   const [roomId, setRoomId] = useState(0);
   const [notPossible, setNotPossible] = useState(true);
+  const [errMessage, setErrMessage] = useState('');
 
   useEffect(() => {
     const fetchHotels = async() => {
@@ -34,7 +35,8 @@ export default function ListHotels() {
       } catch (err) {
         console.log(err);
         setNotPossible(true);
-        err.message !== 'CannotListHotelsError'
+        setErrMessage(err.message);
+        err.message === 'CannotListHotelsError'
           ? toast('Ainda é necessário fazer o pagamento de um ingresso para ter acesso a hospedagens')
           : toast('Seu ingresso não inclui a reserva de um Hotel!');
       }
@@ -53,12 +55,23 @@ export default function ListHotels() {
       <>
         <Ctnr>
           <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
-          <h1>Primeiro, escolha seu hotel</h1>
+
           <Hotels>
             {notPossible ? (
-              <h1>Faça o pagamento de um ticket que inclui uma reserva de Hotel para desbloquear essa página!</h1>
+              <Warning>
+                {errMessage === 'CannotListHotelsError'
+                  ? 'Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem'
+                  : 'Sua modalidade de ingresso não inclui hospedagem Prossiga para a escolha de atividades'}
+              </Warning>
             ) : (
-              hotels?.map((hotel) => <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId}  />)
+              <>
+                <h1>Primeiro, escolha seu hotel</h1>
+                <div>
+                  {hotels?.map((hotel) => (
+                    <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId} />
+                  ))}
+                </div>
+              </>
             )}
           </Hotels>
         </Ctnr>
@@ -70,14 +83,17 @@ export default function ListHotels() {
         <Ctnr>
           <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
           <Hotels>
-            {hotels?.map((hotel) => (
-              <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId}  />
-            ))}
+            <h1>Primeiro, escolha seu hotel</h1>
+            <div>
+              {hotels?.map((hotel) => (
+                <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId} />
+              ))}
+            </div>
           </Hotels>
           <h1>Ótima pedida! Agora escolha seu quarto:</h1>
           <RoomsDiv>
             {rooms?.map((room) => (
-              <RoomDiv key={room.id} room={room} roomId={roomId} setRoomId={setRoomId}/>
+              <RoomDiv key={room.id} room={room} roomId={roomId} setRoomId={setRoomId} />
             ))}
           </RoomsDiv>
         </Ctnr>
@@ -100,7 +116,18 @@ const Ctnr = styled.div`
 `;
 
 const Hotels = styled.div`
-  display: flex;
+  > h1 {
+    font-family: Roboto;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 23px;
+    color: #8e8e8e;
+    margin-bottom: 29px;
+  }
+
+  > div {
+    display: flex;
+  }
 `;
 
 const StyledTypography = styled(Typography)`
@@ -112,4 +139,25 @@ const RoomsDiv = styled.div`
   flex-wrap: wrap;
   width: 88%;
   align-items: start;
+`;
+
+const Warning = styled.div`
+  color: #8e8e8e;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 23px;
+  text-align: center;
+
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  padding-top: 150px;
+  padding-right: 5%;
+
+  p {
+    width: 388px;
+  }
 `;
