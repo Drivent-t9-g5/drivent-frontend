@@ -1,4 +1,3 @@
-/* eslint-disable eol-last */
 import styled from 'styled-components';
 
 export default function IncompleteEnrollment() {

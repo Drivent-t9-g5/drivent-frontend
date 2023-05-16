@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import Hotel from '../../pages/Dashboard/Hotel';
 import { getHotels, getRooms } from '../../services/hotelsApi';
 import useToken from '../../hooks/useToken';
 import { Typography } from '@material-ui/core';
 import { toast } from 'react-toastify';
-import RoomDiv from './Rooms';
-import HotelDiv from './Hotel';
+import ChooseHotels from './ChooseHotels';
 
 export default function ListHotels() {
   const token = useToken();
@@ -16,6 +14,7 @@ export default function ListHotels() {
   const [roomId, setRoomId] = useState(0);
   const [notPossible, setNotPossible] = useState(true);
   const [errMessage, setErrMessage] = useState('');
+  const [allocatedUser, setAllocatedUser] = useState(false);
 
   useEffect(() => {
     const fetchHotels = async() => {
@@ -53,60 +52,26 @@ export default function ListHotels() {
 
   if (!hotels) return null;
 
-  if (hotelId === 0)
-    return (
-      <>
-        <Ctnr>
-          <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
+  return (
+    <>
+      <Ctnr>
+        <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
 
-          <Hotels>
-            {notPossible ? (
-              <Warning>
-                <p>
-                  {errMessage === 'Request failed with status code 400'
-                    ? 'Você precisa completar sua inscrição antes de prosseguir pra escolha de ingresso'
-                    : errMessage === 'Request failed with status code 401'
-                      ? 'Você precisa ter confirmado pagamento antes de fazer a escolha de hospedagem'
-                      : 'Sua modalidade de ingresso não inclui hospedagem. Prossiga para a escolha de atividades'}
-                </p>
-              </Warning>
-            ) : (
-              <>
-                <h1>Primeiro, escolha seu hotel</h1>
-                <div>
-                  {hotels?.map((hotel) => (
-                    <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId} />
-                  ))}
-                </div>
-              </>
-            )}
-          </Hotels>
-        </Ctnr>
-      </>
-    );
-  if (hotelId !== 0) {
-    return (
-      <>
-        <Ctnr>
-          <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
-          <Hotels>
-            <h1>Primeiro, escolha seu hotel</h1>
-            <div>
-              {hotels?.map((hotel) => (
-                <HotelDiv key={hotel.id} hotel={hotel} hotelId={hotelId} setHotelId={setHotelId} />
-              ))}
-            </div>
-          </Hotels>
-          <h1>Ótima pedida! Agora escolha seu quarto:</h1>
-          <RoomsDiv>
-            {rooms?.map((room) => (
-              <RoomDiv key={room.id} room={room} roomId={roomId} setRoomId={setRoomId} />
-            ))}
-          </RoomsDiv>
-        </Ctnr>
-      </>
-    );
-  }
+        <ChooseHotels
+          token={token}
+          hotelId={hotelId}
+          notPossible={notPossible}
+          errMessage={errMessage}
+          hotels={hotels}
+          setHotelId={setHotelId}
+          rooms={rooms}
+          roomId={roomId}
+          setRoomId={setRoomId}
+          setAllocatedUser={setAllocatedUser}
+        />
+      </Ctnr>
+    </>
+  );
 }
 
 const Ctnr = styled.div`
@@ -122,49 +87,7 @@ const Ctnr = styled.div`
   }
 `;
 
-const Hotels = styled.div`
-  > h1 {
-    font-family: Roboto;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 23px;
-    color: #8e8e8e;
-    margin-bottom: 29px;
-  }
-
-  > div {
-    display: flex;
-  }
-`;
-
 const StyledTypography = styled(Typography)`
   margin-bottom: 20px !important;
 `;
 
-const RoomsDiv = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  width: 88%;
-  align-items: start;
-`;
-
-const Warning = styled.div`
-  color: #8E8E8E;
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 23px;
-  text-align: center;
-
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  padding-top: 223px;
-  padding-right: 5%;
-
-  p{
-    width: 388px;
-  }
-`;
