@@ -3,7 +3,7 @@ import RoomDiv from './Rooms';
 import HotelDiv from './Hotel';
 import Button from '../Form/Button';
 import { toast } from 'react-toastify';
-import { postBookRoom } from '../../services/bookingApi';
+import { changeBooking, postBookRoom } from '../../services/bookingApi';
 import { useEffect, useState } from 'react';
 import { getHotels, getRooms } from '../../services/hotelsApi';
 
@@ -12,9 +12,11 @@ export default function ChooseHotels(props) {
     token,
     notPossible,
     setNotPossible,
+    allocatedUser,
     setAllocatedUser,
     roomUpdate,
-    setRoomUpdate
+    setRoomUpdate,
+    setSwitchBooking
   } = props;
 
   const [hotels, setHotels] = useState([]);
@@ -55,14 +57,22 @@ export default function ChooseHotels(props) {
   async function bookingRoom() {
     console.log('TRY BOOKING', 'hotelId:', hotelId, 'roomId:', roomId);
     try {
-      const respose = await postBookRoom(roomId, token);
-      toast('Reserva feita com sucesso');
-      setAllocatedUser(respose);
-      const update = roomUpdate+1;
-      setRoomUpdate(update);
-      console.log('resposeHERE', respose.bookingId);
+      if (!allocatedUser) {
+        const respose = await postBookRoom(roomId, token);
+        toast('Reserva feita com sucesso');
+        setAllocatedUser(respose);
+      } else {
+        console.log('allocatedUser', allocatedUser);
+        const bookingId = allocatedUser.id;
+        const response = await changeBooking(roomId, bookingId, token);
+        toast('Troca efetuada com sucesso');
+        setAllocatedUser(response);
+      }
+      const updateBooking = roomUpdate + 1;
+      setRoomUpdate(updateBooking);
+      setSwitchBooking(false);
     } catch (error) {
-      toast('Quarto indisponivel');
+      toast('Erro ao tentar reservar');
     }
   }
 

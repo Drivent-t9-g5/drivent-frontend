@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import Button from '../Form/Button';
 import { getHotelById, getHotels, getRooms } from '../../services/hotelsApi';
 
-export default function BookedRoom({ room, token }) {
+export default function BookedRoom({ room, token, setSwitchBooking }) {
   const hotelId = room.hotelId;
   const roomName = room.name;
   const [membersMessage, setMembersMessage] = useState('erro');
@@ -38,6 +38,7 @@ export default function BookedRoom({ room, token }) {
 
   function changeRoom() {
     console.log('Should try change room');
+    setSwitchBooking(true);
   };
 
   return (

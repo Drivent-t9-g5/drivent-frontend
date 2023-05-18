@@ -13,6 +13,7 @@ export default function ListHotels() {
   const [notPossible, setNotPossible] = useState(true);
   const [allocatedUser, setAllocatedUser] = useState(false);
   const [roomUpdate, setRoomUpdate] = useState(0);
+  const [switchBooking, setSwitchBooking] = useState(false);
 
   useEffect(async() => {
     try {
@@ -30,15 +31,22 @@ export default function ListHotels() {
     <>
       <Ctnr>
         <StyledTypography variant="h4">Escolha de hotel e quarto</StyledTypography>
-        {allocatedUser ?
-          (<BookedRoom room={allocatedUser} token={token} roomUpdate={roomUpdate} />)
+        {allocatedUser && !switchBooking ?
+          (<BookedRoom
+            room={allocatedUser}
+            token={token}
+            roomUpdate={roomUpdate}
+            setSwitchBooking={setSwitchBooking}
+          />)
           : (<ChooseHotels
             token={token}
             notPossible={notPossible}
             setNotPossible={setNotPossible}
+            allocatedUser={allocatedUser}
             setAllocatedUser={setAllocatedUser}
             roomUpdate={roomUpdate}
             setRoomUpdate={setRoomUpdate}
+            setSwitchBooking={setSwitchBooking}
           />)
         }
       </Ctnr>
