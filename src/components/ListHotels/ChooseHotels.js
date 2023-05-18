@@ -4,32 +4,69 @@ import HotelDiv from './Hotel';
 import Button from '../Form/Button';
 import { toast } from 'react-toastify';
 import { postBookRoom } from '../../services/bookingApi';
+import { useEffect, useState } from 'react';
+import { getHotels, getRooms } from '../../services/hotelsApi';
 
 export default function ChooseHotels(props) {
   const {
     token,
-    hotelId,
     notPossible,
-    errMessage,
-    hotels,
-    setHotelId,
-    rooms,
-    roomId,
-    setRoomId,
-    setAllocatedUser
+    setNotPossible,
+    setAllocatedUser,
+    roomUpdate,
+    setRoomUpdate
   } = props;
+
+  const [hotels, setHotels] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [errMessage, setErrMessage] = useState('');
+  const [hotelId, setHotelId] = useState(0);
+  const [roomId, setRoomId] = useState(0);
+
+  useEffect(async() => {
+    try {
+      const hotelsData = await getHotels(token);
+      setHotels(hotelsData);
+      setNotPossible(false);
+      setRoomId(0);
+      if (hotelId !== 0) {
+        const roomsData = await getRooms(token, hotelId);
+        console.log(roomsData);
+        const resolvedRooms = await roomsData;
+        setRooms(resolvedRooms);
+      }
+      console.log(hotelsData);
+    } catch (err) {
+      console.log(err);
+      setNotPossible(true);
+      setErrMessage(err.message);
+      console.log('error: ' + err);
+      err.message === 'Request failed with status code 400'
+        ? toast()
+        : err.message === 'Request failed with status code 401'
+          ? toast('Ainda é necessário fazer o pagamento de um ingresso para ter acesso a hospedagens')
+          : toast('Seu ingresso não inclui a reserva de um Hotel!');
+    }
+  }, [hotelId]);
+
+  console.log('hotels', hotels);
+  console.log('rooms', rooms);
 
   async function bookingRoom() {
     console.log('TRY BOOKING', 'hotelId:', hotelId, 'roomId:', roomId);
     try {
       const respose = await postBookRoom(roomId, token);
       toast('Reserva feita com sucesso');
-      console.log(respose);
       setAllocatedUser(respose);
+      const update = roomUpdate+1;
+      setRoomUpdate(update);
+      console.log('resposeHERE', respose.bookingId);
     } catch (error) {
       toast('Quarto indisponivel');
     }
   }
+
+  if (!hotels) return null;
 
   if (hotelId === 0)
     return (
