@@ -9,7 +9,6 @@ import TicketContext from '../../contexts/TicketContext';
 export default function Ticket() {
   const [selectedTicket, setSelectedTicket] = useState('');
   const [selectedHotel, setSelectedHotel] = useState('');
-  const [showTicket, setShowTicket] = useState(true);
   const [showAccommodation, setShowAccommodation] = useState(false);
   const [showFinalization, setShowFinalization] = useState(false);
   const [ticketsTypes, setTicketsTypes] = useState(undefined);
@@ -17,14 +16,16 @@ export default function Ticket() {
   const [ticketIncludesHotel, setTicketIncludesHotel] = useState(undefined);
   const [amount, setAmount] = useState(0);
   const { ticketTypes } = useTicketType();
-  const { postTicketLoading, postTicketAct } = usePostTicket();
-  const { ticket, setTicket } = useContext(TicketContext);
+  const { postTicketAct } = usePostTicket();
+  const { setTicket } = useContext(TicketContext);
 
   useEffect(() => {
     if (ticketTypes) {
       setTicketsTypes(ticketTypes);
     }
   }, [ticketTypes]);
+
+  console.log(ticketsTypes);
 
   function handleTicketButtonClick(isRemote, name, price) {
     setSelectedTicket(name);
@@ -44,8 +45,6 @@ export default function Ticket() {
 
   function handleHotelButtonClick(buttonId) {
     const ticket = ticketsTypes.filter((t) => !t.isRemote);
-    console.log(ticket);
-    console.log(ticketsTypes);
     if (buttonId === 'with') {
       setAmount(amount + 350);
       setTicketIncludesHotel(true);
@@ -68,7 +67,6 @@ export default function Ticket() {
       await postTicketAct({ ticketTypeId });
       toast('Ingresso reservado com sucesso!');
       setTicket(ticketTypeId);
-      console.log(ticketTypeId);
     } catch (error) {
       toast('Não foi possível reservar o ingresso!');
     }
@@ -76,12 +74,13 @@ export default function Ticket() {
 
   return (
     <>
-      <TicketContainer show={showTicket}>
+      <TicketContainer>
         <Text>Primeiro, escolha sua modalidade de ingresso</Text>
         {ticketsTypes
           ?.filter((t) => t.includesHotel === false)
           .map((t) => (
             <OptionsButton
+              key={t.id}
               selected={selectedTicket === t.name}
               onClick={() => handleTicketButtonClick(t.isRemote, t.name, t.price)}
             >
@@ -108,9 +107,7 @@ export default function Ticket() {
   );
 }
 
-const TicketContainer = styled.div`
-  display: ${(props) => (props.show ? 'block' : 'none')};
-`;
+const TicketContainer = styled.div``;
 
 const AccommodationContainer = styled.div`
   display: ${(props) => (props.show ? 'block' : 'none')};
