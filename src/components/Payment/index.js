@@ -27,7 +27,6 @@ export default function PaymentTicketContainer() {
       ) : (
         <IncompleteEnrollment />
       )}
-
     </>
   );
 }
