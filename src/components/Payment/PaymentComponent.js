@@ -5,7 +5,7 @@ import CreditCardPlaceholder from './CreditCardPlaceholder';
 import TycketPaymentInfoComponent from './TycketPaymentInfo';
 import { useEffect } from 'react';
 import { useState } from 'react';
-import Ticket from '../Ticket';
+import Ticket from './Ticket';
 import axios from 'axios';
 import useToken from '../../hooks/useToken';
 import { useContext } from 'react';
