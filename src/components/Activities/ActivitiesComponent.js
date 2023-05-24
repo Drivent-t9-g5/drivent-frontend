@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CgEnter } from 'react-icons/cg';
 import { VscError, VscPass } from 'react-icons/vsc';
+import { AiOutlineCheckCircle } from 'react-icons/ai';
 import useEvent from '../../hooks/api/useEvent';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import 'dayjs/locale/pt-br';
 import useActivitie from '../../hooks/api/useActivitie';
 import useAuditorium from '../../hooks/api/useAuditorium';
+import usePostSubscription from '../../hooks/api/usePostSubscription';
+import { toast } from 'react-toastify';
+import useSubscription from '../../hooks/api/useSubscription';
 
 export default function ActivitiesComponent() {
   const [selectedDay, setSelectedDay] = useState('');
@@ -15,9 +19,13 @@ export default function ActivitiesComponent() {
   const [activeEvent, setActiveEvent] = useState(undefined);
   const [auditoriuns, setAuditoriuns] = useState(undefined);
   const [activities, setActivities] = useState(undefined);
+  const [position, setPosition] = useState(undefined);
+  const [subscriptions, setSubscriptions] = useState(undefined);
   const { event } = useEvent();
   const { getActivitie } = useActivitie();
   const { auditoriumData } = useAuditorium();
+  const { getSubscriptions } = useSubscription();
+  const { postSubscriptionAct } = usePostSubscription();
   dayjs.extend(isSameOrBefore);
 
   useEffect(() => {
@@ -51,9 +59,26 @@ export default function ActivitiesComponent() {
   async function handleSelectedDay(day, pos) {
     setSelectedDay(day);
     setShowActivities(true);
+    const subscriptionsList = await getSubscriptions();
+    setSubscriptions(subscriptionsList);
+    setPosition(pos);
     const activitie = await getActivitie(event.id, dates[pos]);
     console.log(activitie);
     setActivities(activitie);
+  }
+
+  async function handleSuperscription(activitieId, capacity) {
+    const newCapacity = capacity - 1;
+    try {
+      await postSubscriptionAct({ activitieId, newCapacity });
+      toast('Inscrito com sucesso!');
+      const activitie = await getActivitie(event.id, dates[position]);
+      setActivities(activitie);
+      const subscriptionsList = await getSubscriptions();
+      setSubscriptions(subscriptionsList);
+    } catch (error) {
+      toast('Não foi possível se inscrever nesta atividade!');
+    }
   }
 
   return (
@@ -74,18 +99,42 @@ export default function ActivitiesComponent() {
               {activities
                 ?.filter((activitie) => activitie.auditoriumId === a.id)
                 .map((activitie) => (
-                  <Activities key={activitie.id} height={dayjs(activitie.endTime).diff(dayjs(activitie.startTime), 'hours')}>
+                  <Activities
+                    backgroundcolor={
+                      subscriptions.some((subs) => subs.activitieId === activitie.id) ? '#D0FFDB' : '#F1F1F1'
+                    }
+                    key={activitie.id}
+                    height={dayjs(activitie.endTime).diff(dayjs(activitie.startTime), 'hours')}
+                  >
                     <div>
                       <p>
                         <span>{activitie.name}</span>
                       </p>
-                      <p>{dayjs(activitie.startTime).add(3, 'hour').format('HH:mm')} - {dayjs(activitie.endTime).add(3, 'hour').format('HH:mm')}</p>
+                      <p>
+                        {dayjs(activitie.startTime).add(3, 'hour').format('HH:mm')} -{' '}
+                        {dayjs(activitie.endTime).add(3, 'hour').format('HH:mm')}
+                      </p>
                     </div>
                     <Line></Line>
-                    <aside>
-                      <CgEnter />
-                      <p>{activitie.capacity} vagas</p>
-                    </aside>
+                    {subscriptions.some((subs) => subs.activitieId === activitie.id) ? (
+                      <CapacitySubscribe backgroundcolor="#D0FFDB" color="#078632" name="inscrito">
+                        <AiOutlineCheckCircle className="icon" />
+                        <p>Inscrito</p>
+                      </CapacitySubscribe>
+                    ) : activitie.capacity !== 0 ? (
+                      <CapacitySubscribe color="#078632" name="enter">
+                        <CgEnter
+                          className="icon"
+                          onClick={() => handleSuperscription(activitie.id, activitie.capacity)}
+                        />
+                        <p>{activitie.capacity} vagas</p>
+                      </CapacitySubscribe>
+                    ) : (
+                      <CapacitySubscribe color="#CC6666" name="error">
+                        <VscError className="icon" />
+                        <p>Esgotado</p>
+                      </CapacitySubscribe>
+                    )}
                   </Activities>
                 ))}
             </div>
@@ -156,13 +205,12 @@ const Activities = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background-color: #f1f1f1;
+  background-color: ${(props) => props.backgroundcolor};
   border: 0px;
   border-radius: 5px;
   width: 95%;
-  height: ${(props => props.height * 80)}px;
+  height: ${(props) => props.height * 80}px;
   margin-top: 10px;
-  cursor: pointer;
   div {
     display: flex;
     flex-direction: column;
@@ -172,19 +220,6 @@ const Activities = styled.button`
     width: 75%;
     padding-left: 5px;
   }
-  aside {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: green;
-    width: 25%;
-    font-size: 20px;
-    p {
-      font-size: 9px;
-      color: green;
-    }
-  }
   p {
     font-size: 12px;
     color: #343434;
@@ -193,6 +228,24 @@ const Activities = styled.button`
   }
   span {
     font-weight: 700;
+  }
+`;
+
+const CapacitySubscribe = styled.aside`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 25%;
+  font-size: 20px;
+  p {
+    margin-top: 5px;
+    font-size: 9px;
+    color: ${(props) => props.color};
+    cursor: default;
+  }
+  .icon {
+    color: ${(props) => props.color};
+    cursor: ${(props) => (props.name === 'enter' ? 'pointer' : 'default')};
   }
 `;
 

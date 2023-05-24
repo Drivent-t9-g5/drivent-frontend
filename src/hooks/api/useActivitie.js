@@ -11,7 +11,7 @@ export default function useActivitie() {
     loading: activitieLoading,
     error: activitieError,
     act: getActivitie,
-  } = useAsync((eventId, date) => activitiesApi.getActivitiesByDate(token, eventId, date));
+  } = useAsync((eventId, date) => activitiesApi.getActivitiesByDate(token, eventId, date), false);
 
   return {
     activitie,
