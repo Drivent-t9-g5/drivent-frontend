@@ -77,7 +77,11 @@ export default function ActivitiesComponent() {
       const subscriptionsList = await getSubscriptions();
       setSubscriptions(subscriptionsList);
     } catch (error) {
-      toast('Não foi possível se inscrever nesta atividade!');
+      if (error.message === 'Request failed with status code 409') {
+        toast('Você já está inscrito em uma atividade nesse horário');
+      } else {
+        toast('Não foi possível se inscrever nesta atividade!');
+      }
     }
   }
 
